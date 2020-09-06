@@ -18,6 +18,7 @@
 #include "../lv_draw/lv_draw.h"
 #include "../lv_font/lv_font_fmt_txt.h"
 #include "../lv_gpu/lv_gpu_stm32_dma2d.h"
+#include <stdio.h>
 
 #if LV_USE_PERF_MONITOR
     #include "../lv_widgets/lv_label.h"
@@ -538,6 +539,7 @@ static void lv_refr_area_part(const lv_area_t * area_p)
             top_prev_scr = disp_refr->prev_scr;
         }
         /*Do the refreshing from the top object*/
+        fprintf(stderr,"refreshing top_prev_scr %p\n", top_prev_scr);
         lv_refr_obj_and_children(top_prev_scr, &start_mask);
 
     }
@@ -546,11 +548,15 @@ static void lv_refr_area_part(const lv_area_t * area_p)
     if(top_act_scr == NULL) {
         top_act_scr = disp_refr->act_scr;
     }
+
+    fprintf(stderr,"refreshing top_act_scr %p\n", top_act_scr);
     /*Do the refreshing from the top object*/
     lv_refr_obj_and_children(top_act_scr, &start_mask);
 
     /*Also refresh top and sys layer unconditionally*/
+    fprintf(stderr,"refreshing top(disp_refr) %p\n", lv_disp_get_layer_top(disp_refr));
     lv_refr_obj_and_children(lv_disp_get_layer_top(disp_refr), &start_mask);
+    fprintf(stderr,"refreshing sys(disp_refr) %p\n", lv_disp_get_layer_sys(disp_refr));
     lv_refr_obj_and_children(lv_disp_get_layer_sys(disp_refr), &start_mask);
 
     /* In true double buffered mode flush only once when all areas were rendered.
@@ -611,6 +617,7 @@ static void lv_refr_obj_and_children(lv_obj_t * top_p, const lv_area_t * mask_p)
     if(top_p == NULL) return;  /*Shouldn't happen*/
 
     /*Refresh the top object and its children*/
+    fprintf(stderr, "lv_refr_obj_and_children refreshing1 %p\n",top_p);
     lv_refr_obj(top_p, mask_p);
 
     /*Draw the 'younger' sibling objects because they can be on top_obj */
@@ -626,6 +633,7 @@ static void lv_refr_obj_and_children(lv_obj_t * top_p, const lv_area_t * mask_p)
 
         while(i != NULL) {
             /*Refresh the objects*/
+            fprintf(stderr, "lv_refr_obj_and_children refreshing2 %p\n",i);
             lv_refr_obj(i, mask_p);
             i = _lv_ll_get_prev(&(par->child_ll), i);
         }
@@ -709,6 +717,7 @@ static void lv_refr_obj(lv_obj_t * obj, const lv_area_t * mask_ori_p)
                 /*If the parent and the child has common area then refresh the child */
                 if(union_ok) {
                     /*Refresh the next children*/
+                    fprintf(stderr, "lv_refr_obj refreshing child %p\n",child_p);
                     lv_refr_obj(child_p, &mask_child);
                 }
             }
